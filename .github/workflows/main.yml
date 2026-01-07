@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>早自習點名系統</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding: 20px; background-color: #f4f4f9; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); gap: 10px; max-width: 500px; margin: 0 auto; }
+        .student { padding: 15px 0; background-color: #fff; border: 2px solid #ddd; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 1.2rem; transition: 0.2s; }
+        .student.present { background-color: #ccc; color: #888; border-color: #bbb; }
+        #absent-report { margin-top: 30px; padding: 20px; background: white; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h2 { color: #d9534f; }
+        .absent-list { font-size: 1.5rem; color: #d9534f; font-weight: bold; letter-spacing: 2px; }
+        button.reset { margin-top: 20px; padding: 10px 20px; background: #5bc0de; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <h1>早自習點名</h1>
+    <p>點擊座號代表已到，下方會自動列出未到者</p>
+
+    <div class="grid" id="studentGrid"></div>
+
+    <div id="absent-report">
+        <h2>未到名單</h2>
+        <div class="absent-list" id="absentList">全部未到</div>
+    </div>
+
+    <button class="reset" onclick="resetList()">清除重來</button>
+
+    <script>
+        // 根據你照片中的座位表提取的座號（1-41號）
+        const seatNumbers = [
+            1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 
+            11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 
+            21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 
+            31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41
+        ];
+
+        let presentStudents = new Set();
+        const grid = document.getElementById('studentGrid');
+        const absentDisplay = document.getElementById('absentList');
+
+        function init() {
+            grid.innerHTML = '';
+            seatNumbers.forEach(num => {
+                const div = document.createElement('div');
+                div.className = 'student';
+                div.innerText = num;
+                div.onclick = () => toggleStatus(num, div);
+                grid.appendChild(div);
+            });
+            updateAbsent();
+        }
+
+        function toggleStatus(num, element) {
+            if (presentStudents.has(num)) {
+                presentStudents.delete(num);
+                element.classList.remove('present');
+            } else {
+                presentStudents.add(num);
+                element.classList.add('present');
+            }
+            updateAbsent();
+        }
+
+        function updateAbsent() {
+            const absent = seatNumbers.filter(num => !presentStudents.has(num));
+            absentDisplay.innerText = absent.length === 0 ? "全體到齊" : absent.join('、');
+        }
+
+        function resetList() {
+            presentStudents.clear();
+            const elements = document.querySelectorAll('.student');
+            elements.forEach(el => el.classList.remove('present'));
+            updateAbsent();
+        }
+
+        init();
+    </script>
+</body>
+</html>
